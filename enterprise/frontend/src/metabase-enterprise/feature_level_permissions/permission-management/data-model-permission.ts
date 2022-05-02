@@ -1,5 +1,5 @@
 import { push } from "react-router-redux";
-import { GroupsPermissions } from "metabase-types/api";
+import { Group, GroupsPermissions } from "metabase-types/api";
 import { t } from "ttag";
 import { getGroupFocusPermissionsUrl } from "metabase/admin/permissions/utils/urls";
 import { UNABLE_TO_CHANGE_ADMIN_PERMISSIONS } from "metabase/admin/permissions/constants/messages";
@@ -14,6 +14,7 @@ import {
   getSchemasPermission,
   getTablesPermission,
 } from "metabase/admin/permissions/utils/graph";
+import { getPermissionWarning } from "metabase/admin/permissions/selectors/confirmations";
 
 export const DATA_MODEL_PERMISSION_REQUIRES_DATA_ACCESS = t`Data model access requires full data access.`;
 
@@ -37,6 +38,12 @@ export const DATA_MODEL_PERMISSION_OPTIONS = {
     iconColor: "warning",
   },
 };
+
+const DATA_MODEL_PERMISSIONS_DESC = [
+  DATA_MODEL_PERMISSION_OPTIONS.edit.value,
+  DATA_MODEL_PERMISSION_OPTIONS.controlled.value,
+  DATA_MODEL_PERMISSION_OPTIONS.none.value,
+];
 
 const getPermissionValue = (
   permissions: GroupsPermissions,
@@ -69,6 +76,7 @@ export const buildDataModelPermission = (
   groupId: number,
   isAdmin: boolean,
   permissions: GroupsPermissions,
+  defaultGroup: Group,
   permissionSubject: PermissionSubject,
 ) => {
   const hasChildEntities = permissionSubject !== "fields";
@@ -80,15 +88,32 @@ export const buildDataModelPermission = (
     permissionSubject,
   );
 
+  const defaultGroupValue = getPermissionValue(
+    permissions,
+    defaultGroup.id,
+    entityId,
+    permissionSubject,
+  );
+
+  const warning = getPermissionWarning(
+    value,
+    defaultGroupValue,
+    permissionSubject,
+    defaultGroup,
+    groupId,
+    DATA_MODEL_PERMISSIONS_DESC,
+  );
+
   return {
     permission: "data-model",
     type: "data-model",
     isDisabled: isAdmin,
+    warning,
+    value,
+    isHighlighted: isAdmin,
     disabledTooltip: isAdmin
       ? UNABLE_TO_CHANGE_ADMIN_PERMISSIONS
       : DATA_MODEL_PERMISSION_REQUIRES_DATA_ACCESS,
-    isHighlighted: isAdmin,
-    value,
     options: [
       DATA_MODEL_PERMISSION_OPTIONS.none,
       ...(hasChildEntities ? [DATA_MODEL_PERMISSION_OPTIONS.controlled] : []),
