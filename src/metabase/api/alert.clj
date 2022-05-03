@@ -137,9 +137,8 @@
    card             pulse/CardRef
    channels         (su/non-empty [su/Map])}
   (validation/check-has-application-permission :subscription false)
-  ;; do various perms checks as needed. Perms for an Alert == perms for its Card. So to create an Alert you need write
-  ;; perms for its Card
-  (api/write-check Card (u/the-id card))
+  ;; To create an Alert you need read perms for its Card
+  (api/read-check Card (u/the-id card))
   ;; ok, now create the Alert
   (let [alert-card (-> card (maybe-include-csv alert_condition) pulse/card->ref)
         new-alert  (api/check-500

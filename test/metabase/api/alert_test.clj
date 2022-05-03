@@ -298,7 +298,7 @@
              (mt/with-temp Collection [collection]
                (db/update! Card (u/the-id card) :collection_id (u/the-id collection))
                (with-alert-setup
-                 (perms/grant-collection-readwrite-permissions! (perms-group/all-users) collection)
+                 (perms/grant-collection-read-permissions! (perms-group/all-users) collection)
                  [(et/with-expected-messages 1
                     (alert-response
                      ((alert-client :rasta) :post 200 "alert"
@@ -358,7 +358,7 @@
                            Card       [card {:name          "My question"
                                              :display       "line"
                                              :collection_id (u/the-id collection)}]]
-             (perms/grant-collection-readwrite-permissions! (perms-group/all-users) collection)
+             (perms/grant-collection-read-permissions! (perms-group/all-users) collection)
              (with-alert-setup
                (et/with-expected-messages 1
                  (mt/user-http-request
@@ -380,7 +380,7 @@
                            Card       [card {:name          "My question"
                                              :display       "bar"
                                              :collection_id (u/the-id collection)}]]
-             (perms/grant-collection-readwrite-permissions! (perms-group/all-users) collection)
+             (perms/grant-collection-read-permissions! (perms-group/all-users) collection)
              (with-alert-setup
                (et/with-expected-messages 1
                  (mt/user-http-request
